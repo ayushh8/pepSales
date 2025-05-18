@@ -88,13 +88,13 @@ Use this to send a notification. Just send a POST request with the details in th
 
 ```json
 {
-  "userId": "string",         // User ID (required)
-  "type": "string",           // Type of notification (EMAIL, SMS, or IN_APP - required)
-  "title": "string",          // Notification title (required)
-  "message": "string",        // The actual message content (required)
-  "to": "string",             // Recipient (needed for EMAIL and SMS)
-  "subject": "string",        // Email subject (needed for EMAIL)
-  "metadata": { "any": "any" } // Optional extra data
+  "userId": "string",         
+  "type": "string",          
+  "title": "string",          
+  "message": "string",        
+  "to": "string",             
+  "subject": "string",        
+  "metadata": { "any": "any" }
 }
 ```
 
