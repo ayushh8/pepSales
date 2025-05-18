@@ -1,111 +1,128 @@
-# Notification Service
+# Notification Service - Intern Assignment
 
-A robust notification service that supports multiple notification channels including email, SMS, and in-app notifications. The service uses a message queue for reliable delivery and includes retry mechanisms for failed notifications.
+This project is a notification service built as part of an intern assignment.
 
-## Features
+## Objective
 
-- Multiple notification channels (Email, SMS, In-app)
-- Asynchronous processing using RabbitMQ
-- Automatic retry mechanism for failed notifications
-- RESTful API endpoints
-- MongoDB for notification storage
+The main goal here was to create a system that can send different kinds of notifications to users.
 
-## Prerequisites
+## What's Implemented (Assignment Requirements)
 
-- Node.js (v14 or higher)
-- MongoDB
-- RabbitMQ
-- SMTP server (for email notifications)
-- Twilio account (for SMS notifications)
+I've focused on getting the core requirements from the assignment in place:
 
-## Installation
+### 1. API Endpoints
 
-1. Clone the repository.
+*   **Send a Notification (`POST /api/notifications`)**
+    *   This endpoint lets you trigger various types of notifications. Check out the [API Endpoints](#api-endpoints) section below for more on how to use it.
 
-2. Install dependencies:
-```bash
-npm install
-```
+*   **Get User Notifications (`GET /api/users/{userId}/notifications`)**
+    *   We can use this to fetch all the notifications saved for a specific user. Details are in the [API Endpoints](#api-endpoints) section.
 
-3. Create a `.env` file in the root directory by copying `example.env` and filling in your credentials:
-```bash
-cp example.env .env
-```
+### 2. Notification Types
 
-4. Update the `.env` file with your actual configuration:
-   - MongoDB connection string
-   - RabbitMQ connection URL
-   - Twilio Account SID, Auth Token, and Phone Number
-   - SMTP Host, Port, User (your email), and Pass (your App Password if using Gmail)
+The service is set up to handle sending notifications through a few different channels:
 
-## Running the Service
+*   **Email:** Uses Nodemailer, and we can set up our SMTP details.
+*   **SMS:** Integrates with the Twilio API for sending text messages.
+*   **In-app:** There's a basic setup here, ready to be connected to something like WebSockets for real-time alerts.
 
-1. Start your MongoDB and RabbitMQ services.
+## Bonus Features I Added
 
-2. Start the service in development mode with hot-reload:
-```bash
-npm run dev
-```
+To go a bit beyond the basics, I included these features:
 
-   Alternatively, start the service in production mode:
-```bash
-npm start
-```
+*   **Message Queue:** Using RabbitMQ. This helps handle sending notifications in the background, making the API faster and more reliable.
+*   **Retries:** If sending a notification fails, the service will automatically try again up to 3 times. It also logs the errors for failed attempts.
 
-## API Endpoints
+## What's in This Repository (Deliverables)
+
+This repo contains everything needed for the assignment:
+
+*   The complete source code for the notification service.
+*   This README file, which explains how to set things up and what assumptions I made.
+
+## Getting Started (Setup Instructions)
+
+Here's how to get this running on your machine:
+
+1.  Grab the code by cloning this Git repository.
+
+2.  Go into the project folder using your terminal.
+
+3.  Install the needed packages:
+    ```bash
+    npm install
+    ```
+
+4.  Make a copy of the example environment file:
+    ```bash
+    cp example.env .env
+    ```
+
+5.  Open the new `.env` file and fill in your actual connection details for MongoDB, RabbitMQ, Twilio, and your email provider (SMTP). The `example.env` has notes to help you.
+
+6.  Make sure MongoDB and RabbitMQ servers are up and running.
+
+## How to Run
+
+*   For development (with automatic restarts when you save changes):
+    ```bash
+    npm run dev
+    ```
+
+*   For a production-like setup:
+    ```bash
+    npm start
+    ```
+
+The service will be accessible at the port set in `.env` file (3000).
+
+## API Endpoints (More Detail)
 
 ### Send Notification
 
-Sends a new notification.
-
 `POST /api/notifications`
 
-**Request Body Example:**
+Use this to send a notification. Just send a POST request with the details in the body.
+
+**Request Body Looks Like This:**
+
 ```json
 {
-  "userId": "user123",
-  "type": "EMAIL",
-  "title": "Welcome",
-  "message": "Welcome to our platform!",
-  "to": "user@example.com",
-  "subject": "Welcome Email",
-  "metadata": { "campaignId": "xyz" }
+  "userId": "string",         // User ID (required)
+  "type": "string",           // Type of notification (EMAIL, SMS, or IN_APP - required)
+  "title": "string",          // Notification title (required)
+  "message": "string",        // The actual message content (required)
+  "to": "string",             // Recipient (needed for EMAIL and SMS)
+  "subject": "string",        // Email subject (needed for EMAIL)
+  "metadata": { "any": "any" } // Optional extra data
 }
 ```
 
-*Note: The `to` and `subject` fields are required for EMAIL notifications. The `to` field is required for SMS notifications.* `metadata` is optional.
-
 ### Get User Notifications
-
-Retrieves all notifications for a specific user.
 
 `GET /api/users/{userId}/notifications`
 
-**Example:**
-```
-GET /api/users/user123/notifications
-```
+To get a list of notifications for a user, make a GET request to this endpoint, replacing `{userId}` with the actual user's ID.
 
-## Architecture
+## Project Structure
 
-The service follows a layered architecture with the following components:
+The code is organized into layers:
 
-- **API Layer**: Handles incoming HTTP requests and sends responses.
-- **Service Layer**: Contains the core business logic for creating, sending, and managing notifications.
-- **Queue Layer**: Uses RabbitMQ for asynchronous processing of notification tasks, improving performance and reliability.
-- **Data Layer**: Interacts with MongoDB for storing and retrieving notification data.
+*   **API Layer**: Handles incoming web requests.
+*   **Service Layer**: Where the main notification logic lives (creating, sending, etc.).
+*   **Queue Layer**: Deals with putting notifications onto the RabbitMQ queue and processing them.
+*   **Data Layer**: Handles talking to the MongoDB database.
 
-## Error Handling and Retries
+## Handling Errors and Retries
 
-The service includes built-in error handling. If sending a notification fails, it will be automatically retried up to 3 times. Failed notifications and their errors are logged.
+I've included error handling for when notifications fail to send. They'll be automatically retried a few times (up to 3). Any errors are logged, and the notification status in the database is updated.
 
-## Testing
+## Assumptions I Made
 
-Run tests using:
-```bash
-npm test
-```
+Just a few things I assumed while building this:
 
-## License
-
-MIT 
+*   You'll have RabbitMQ and MongoDB set up and running where the application can reach them.
+*   All the necessary connection details and API keys will be provided correctly in the `.env` file.
+*   If you're using Gmail for email, you'll use an App Password for security (you need 2-Step Verification on your Google Account for this).
+*   The in-app notification part is just a starting point; you'd need more work to make it fully real-time.
+*   There's some basic checking of the data you send to the API, but for a real system, you'd probably want more robust validation.
